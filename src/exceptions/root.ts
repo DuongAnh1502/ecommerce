@@ -4,12 +4,17 @@ interface ErrorProps {
     statusCode: number;
     errors: any;
 }
-class HttpException extends Error {
+export class HttpException extends Error {
     message: string;
     errorCode: any;
     statusCode: number;
-    errors: any;
-    constructor({ message, errorCode, statusCode, errors }: ErrorProps) {
+    errors: ErrorCodes;
+    constructor(
+        message: string,
+        errorCode: ErrorCodes,
+        statusCode: number,
+        errors: any
+    ) {
         super(message);
         this.message = message;
         this.errorCode = errorCode;
