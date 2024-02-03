@@ -6,6 +6,7 @@ import { JWT_SECRET } from "../secrets";
 import { BadRequestException } from "../exceptions/bad-requests";
 import { ErrorCodes } from "../exceptions/root";
 import { UnprocessableEntity } from "../exceptions/validation";
+import { SignUpSchema } from "../schema/users";
 
 export const signup = async (
     req: Request,
@@ -13,6 +14,7 @@ export const signup = async (
     next: NextFunction
 ) => {
     try {
+        SignUpSchema.parse(req.body);
         const { email, password, name } = req.body;
         let user = await prismaClient.user.findFirst({ where: { email } });
         if (user) {
@@ -32,7 +34,7 @@ export const signup = async (
             new UnprocessableEntity(
                 "Unprocessable Entity",
                 ErrorCodes.UNPROCESSABLE_ENTITY,
-                err?.cause?.issues
+                err?.issues
             )
         );
     }
