@@ -5,10 +5,8 @@ import * as jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../secrets";
 import { BadRequestException } from "../exceptions/bad-requests";
 import { ErrorCodes } from "../exceptions/root";
-import { UnprocessableEntity } from "../exceptions/validation";
 import { SignUpSchema } from "../schema/users";
 import { NotFoundException } from "../exceptions/not-found";
-import { IncorrectException } from "../exceptions/incorrect-data";
 
 export const signup = async (req: Request, res: Response) => {
     SignUpSchema.parse(req.body);
@@ -49,4 +47,8 @@ export const login = async (req: Request, res: Response) => {
         JWT_SECRET
     );
     res.json({ user, token });
+};
+
+export const me = async (req: Request, res: Response) => {
+    res.json(req.user);
 };
