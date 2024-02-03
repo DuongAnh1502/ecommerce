@@ -1,9 +1,3 @@
-interface ErrorProps {
-    message: string;
-    errorCode: any;
-    statusCode: number;
-    errors: any;
-}
 export class HttpException extends Error {
     message: string;
     errorCode: any;
@@ -28,4 +22,5 @@ export enum ErrorCodes {
     INCORRECT_PASSWORD = 1003,
     UNPROCESSABLE_ENTITY = 2001,
     INTERNAL_EXCEPTION = 3001,
+    INCORRECT_DATA = 4001,
 }

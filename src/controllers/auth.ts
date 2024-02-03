@@ -7,64 +7,40 @@ import { BadRequestException } from "../exceptions/bad-requests";
 import { ErrorCodes } from "../exceptions/root";
 import { UnprocessableEntity } from "../exceptions/validation";
 import { SignUpSchema } from "../schema/users";
+import { NotFoundException } from "../exceptions/not-found";
+import { IncorrectException } from "../exceptions/incorrect-data";
 
-export const signup = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
-    try {
-        SignUpSchema.parse(req.body);
-        const { email, password, name } = req.body;
-        let user = await prismaClient.user.findFirst({ where: { email } });
-        if (user) {
-            next(
-                new BadRequestException(
-                    "User already exists!",
-                    ErrorCodes.USER_ALREADY_EXISTS
-                )
-            );
-        }
-        user = await prismaClient.user.create({
-            data: { email, password: hashSync(password, 10), name },
-        });
-        res.json(user);
-    } catch (err: any) {
-        next(
-            new UnprocessableEntity(
-                "Unprocessable Entity",
-                ErrorCodes.UNPROCESSABLE_ENTITY,
-                err?.issues
-            )
+export const signup = async (req: Request, res: Response) => {
+    SignUpSchema.parse(req.body);
+    const { email, password, name } = req.body;
+    let user = await prismaClient.user.findFirst({ where: { email } });
+    if (user) {
+        throw new BadRequestException(
+            "User already exists!",
+            ErrorCodes.USER_ALREADY_EXISTS
         );
     }
+    user = await prismaClient.user.create({
+        data: { email, password: hashSync(password, 10), name },
+    });
+    res.json(user);
 };
 
-export const login = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     let user = await prismaClient.user.findFirst({ where: { email } });
     if (!user) {
-        next(
-            new BadRequestException(
-                "User does not exists!",
-                ErrorCodes.USER_NOT_FOUND
-            )
+        throw new NotFoundException(
+            "User not found!",
+            ErrorCodes.USER_NOT_FOUND
         );
-        return;
     }
     if (!compareSync(password, user.password)) {
-        next(
-            new BadRequestException(
-                "Incorrect password!",
-                ErrorCodes.INCORRECT_PASSWORD
-            )
+        throw new BadRequestException(
+            "Incorrect password!",
+            ErrorCodes.INCORRECT_PASSWORD
         );
-        return;
     }
     const token = jwt.sign(
         {
