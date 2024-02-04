@@ -18,6 +18,6 @@ export const prismaClient = new PrismaClient({
 });
 app.use(errorMiddleware);
 app.listen(PORT, () => {
-    console.log("Server is running on port 5555");
-    console.log("http://localhost:5555");
+    console.log("Server is running on port 7777");
+    console.log("http://localhost:7777");
 });
