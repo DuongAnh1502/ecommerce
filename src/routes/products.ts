@@ -4,6 +4,7 @@ import {
     createProduct,
     deleteProduct,
     getProductById,
+    updateProduct,
 } from "../controllers/products";
 import authMiddleware from "../middlewares/auth";
 import adminMiddlewaare from "../middlewares/admin";
@@ -20,5 +21,10 @@ productsRoutes.delete(
     "/:id",
     [authMiddleware, adminMiddlewaare],
     errorHandler(deleteProduct)
+);
+productsRoutes.put(
+    "/:id",
+    [authMiddleware, adminMiddlewaare],
+    errorHandler(updateProduct)
 );
 export default productsRoutes;

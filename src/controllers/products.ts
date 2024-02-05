@@ -16,23 +16,28 @@ export const createProduct = async (req: Request, res: Response) => {
     res.json(product);
 };
 
-export const updateProduct = async (req: Request, res: Response) => {};
+export const updateProduct = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    ProductSchema.parse(req.body);
+    const product = await prismaClient.product.update({
+        where: {
+            id: Number(id),
+        },
+        data: {
+            ...req.body,
+            tags: req.body.tags.join(","),
+        },
+    });
+    res.json(product);
+};
 
 export const deleteProduct = async (req: Request, res: Response) => {
     const { id } = req.params;
-    try {
-        await prismaClient.product.delete({
-            where: {
-                id: Number(id),
-            },
-        });
-    } catch (err: any) {
-        throw new NotFoundException(
-            "Product not found",
-            ErrorCodes.PRODUCT_NOT_FOUND,
-            err
-        );
-    }
+    await prismaClient.product.delete({
+        where: {
+            id: Number(id),
+        },
+    });
     res.json({ message: "Product deleted" });
 };
 
@@ -43,10 +48,18 @@ export const listProducts = async (req: Request, res: Response) => {
 
 export const getProductById = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const product = await prismaClient.product.findUnique({
-        where: {
-            id: Number(id),
-        },
-    });
-    res.json(product);
+    try {
+        const product = await prismaClient.product.findUnique({
+            where: {
+                id: Number(id),
+            },
+        });
+        res.json(product);
+    } catch (err: any) {
+        throw new NotFoundException(
+            "Product not found",
+            ErrorCodes.PRODUCT_NOT_FOUND,
+            err
+        );
+    }
 };
