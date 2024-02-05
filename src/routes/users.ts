@@ -6,10 +6,11 @@ import {
     deleteAddress,
     listAddress,
     updateAddress,
+    updateUser,
 } from "../controllers/user";
 
 const usersRoutes: Router = Router();
-
+//Address
 usersRoutes.post("/address", [authMiddleware], errorHandler(addAddress));
 usersRoutes.delete(
     "/address/:id",
@@ -18,5 +19,7 @@ usersRoutes.delete(
 );
 usersRoutes.put("/address/:id", [authMiddleware], errorHandler(updateAddress));
 usersRoutes.get("/address", [authMiddleware], errorHandler(listAddress));
+//User
+usersRoutes.put("/", [authMiddleware], errorHandler(updateUser));
 
 export default usersRoutes;

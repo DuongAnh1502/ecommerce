@@ -64,3 +64,6 @@ export const listAddress = async (req: Request, res: Response) => {
     });
     res.json(address);
 };
+
+//User route
+export const updateUser = async (req: Request, res: Response) => {};
