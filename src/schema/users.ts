@@ -7,3 +7,11 @@ export const SignUpSchema = z.object({
         .string()
         .min(6, { message: "Password must be at least 6 characters long!" }),
 });
+
+export const AddressSchema = z.object({
+    lineOne: z.string(),
+    lineTwo: z.string().nullable(),
+    pinCode: z.string().length(6),
+    country: z.string(),
+    city: z.string(),
+});

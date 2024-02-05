@@ -16,7 +16,7 @@ export const errorHandler = (method: Function) => {
                 exception = new UnprocessableEntity(
                     "Validation failed",
                     ErrorCodes.UNPROCESSABLE_ENTITY,
-                    err.errors[0].message
+                    err
                 );
             } else {
                 exception = new InternalException(
