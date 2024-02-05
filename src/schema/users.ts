@@ -15,3 +15,11 @@ export const AddressSchema = z.object({
     country: z.string(),
     city: z.string(),
 });
+
+export const UpdateAddressSchema = z.object({
+    lineOne: z.string().optional(),
+    lineTwo: z.string().nullable().optional(),
+    pinCode: z.string().length(6).optional(),
+    country: z.string().optional(),
+    city: z.string().optional(),
+});

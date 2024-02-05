@@ -1,13 +1,13 @@
 import { Response, Request } from "express";
-import { AddressSchema } from "../schema/users";
+import { AddressSchema, UpdateAddressSchema } from "../schema/users";
 import { User } from "@prisma/client";
 import { prismaClient } from "..";
 import { NotFoundException } from "../exceptions/not-found";
 import { ErrorCodes } from "../exceptions/root";
+import { UnauthorizedException } from "../exceptions/unauthorized";
 
 export const addAddress = async (req: Request, res: Response) => {
     AddressSchema.parse(req.body);
-    let user: User;
     const address = await prismaClient.address.create({
         data: {
             ...req.body,
@@ -34,7 +34,27 @@ export const deleteAddress = async (req: Request, res: Response) => {
     res.json({ message: "Address deleted successfully!" });
 };
 
-export const updateAddress = async (req: Request, res: Response) => {};
+export const updateAddress = async (req: Request, res: Response) => {
+    UpdateAddressSchema.parse(req.body);
+    try {
+        const updateAddress = await prismaClient.address.update({
+            where: {
+                id: +req.params.id,
+                userId: +req.user.id,
+            },
+            data: {
+                ...req.body,
+            },
+        });
+    } catch (err: any) {
+        throw new UnauthorizedException(
+            "You are not authorized to update this address!",
+            ErrorCodes.UNAUTHORIZED,
+            err
+        );
+    }
+    res.json(updateAddress);
+};
 
 export const listAddress = async (req: Request, res: Response) => {
     const address = await prismaClient.address.findMany({
