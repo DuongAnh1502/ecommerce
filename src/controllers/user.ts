@@ -1,10 +1,14 @@
 import { Response, Request } from "express";
-import { AddressSchema, UpdateAddressSchema } from "../schema/users";
-import { User } from "@prisma/client";
+import {
+    AddressSchema,
+    UpdateAddressSchema,
+    UpdateUserSchema,
+} from "../schema/users";
 import { prismaClient } from "..";
 import { NotFoundException } from "../exceptions/not-found";
 import { ErrorCodes } from "../exceptions/root";
 import { UnauthorizedException } from "../exceptions/unauthorized";
+import { Address } from "@prisma/client";
 
 export const addAddress = async (req: Request, res: Response) => {
     AddressSchema.parse(req.body);
@@ -66,4 +70,57 @@ export const listAddress = async (req: Request, res: Response) => {
 };
 
 //User route
-export const updateUser = async (req: Request, res: Response) => {};
+export const updateUser = async (req: Request, res: Response) => {
+    UpdateUserSchema.parse(req.body);
+    let shippingAddress: Address;
+    let billingAddress: Address;
+    if (req.body.defaultShippingAddress !== null) {
+        try {
+            shippingAddress = await prismaClient.address.findFirstOrThrow({
+                where: {
+                    id: req.body.defaultShippingAddress,
+                },
+            });
+        } catch (err: any) {
+            throw new NotFoundException(
+                "Shipping Address not found!",
+                ErrorCodes.ADDRESS_NOT_FOUND,
+                err
+            );
+        }
+        if (shippingAddress.userId !== req.user.id) {
+            throw new UnauthorizedException(
+                "You are not authorized to update this address!",
+                ErrorCodes.UNAUTHORIZED
+            );
+        }
+    }
+    if (req.body.defaultBillingAddress !== null) {
+        try {
+            billingAddress = await prismaClient.address.findFirstOrThrow({
+                where: {
+                    id: req.body.defaultBillingAddress,
+                },
+            });
+        } catch (err: any) {
+            throw new NotFoundException(
+                "Billing Address not found!",
+                ErrorCodes.ADDRESS_NOT_FOUND,
+                err
+            );
+        }
+        if (billingAddress.userId !== req.user.id) {
+            throw new UnauthorizedException(
+                "You are not authorized to update this address!",
+                ErrorCodes.UNAUTHORIZED
+            );
+        }
+    }
+    const updatedUser = await prismaClient.user.update({
+        where: {
+            id: req.user.id,
+        },
+        data: req.body,
+    });
+    res.json(updatedUser);
+};
