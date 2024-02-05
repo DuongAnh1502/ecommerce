@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { prismaClient } from "..";
-import { ProductSchema } from "../schema/products";
+import { ProductSchema, UpdateProductSchema } from "../schema/products";
 import { ErrorCodes } from "../exceptions/root";
 import { NotFoundException } from "../exceptions/not-found";
 
@@ -18,14 +18,16 @@ export const createProduct = async (req: Request, res: Response) => {
 
 export const updateProduct = async (req: Request, res: Response) => {
     const { id } = req.params;
-    ProductSchema.parse(req.body);
+    UpdateProductSchema.parse(req.body);
+    if (req.body.tags) {
+        req.body.tags = req.body.tags.join(",");
+    }
     const product = await prismaClient.product.update({
         where: {
             id: Number(id),
         },
         data: {
             ...req.body,
-            tags: req.body.tags.join(","),
         },
     });
     res.json(product);
@@ -35,15 +37,23 @@ export const deleteProduct = async (req: Request, res: Response) => {
     const { id } = req.params;
     await prismaClient.product.delete({
         where: {
-            id: Number(id),
+            id: +id,
         },
     });
     res.json({ message: "Product deleted" });
 };
 
 export const listProducts = async (req: Request, res: Response) => {
-    const products = await prismaClient.product.findMany();
-    res.json(products);
+    const count = await prismaClient.product.count();
+    const products = await prismaClient.product.findMany({
+        skip: +req.query.skip! || 0,
+        take: 5,
+    });
+    const list = {
+        count,
+        data: products,
+    };
+    res.json(list);
 };
 
 export const getProductById = async (req: Request, res: Response) => {

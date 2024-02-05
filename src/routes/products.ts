@@ -4,6 +4,7 @@ import {
     createProduct,
     deleteProduct,
     getProductById,
+    listProducts,
     updateProduct,
 } from "../controllers/products";
 import authMiddleware from "../middlewares/auth";
@@ -16,6 +17,7 @@ productsRoutes.post(
     [authMiddleware, adminMiddlewaare],
     errorHandler(createProduct)
 );
+productsRoutes.get("/", errorHandler(listProducts));
 productsRoutes.get("/:id", errorHandler(getProductById));
 productsRoutes.delete(
     "/:id",
