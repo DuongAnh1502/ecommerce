@@ -12,8 +12,7 @@ export const errorHandler = (method: Function) => {
             let exception: HttpException;
             if (err instanceof HttpException) {
                 exception = err;
-            }
-            if (err instanceof z.ZodError) {
+            } else if (err instanceof z.ZodError) {
                 exception = new UnprocessableEntity(
                     "Validation failed",
                     ErrorCodes.UNPROCESSABLE_ENTITY,
