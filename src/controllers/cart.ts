@@ -29,13 +29,31 @@ export const addToCart = async (req: Request, res: Response) => {
             err
         );
     }
-    const cart = await prismaClient.cartItem.create({
-        data: {
-            ...validatedData,
+    const oldCart = await prismaClient.cartItem.findFirst({
+        where: {
+            productId: validatedData.productId,
             userId: req.user.id,
         },
     });
-    res.send(cart);
+    if (!oldCart) {
+        const cart = await prismaClient.cartItem.create({
+            data: {
+                ...validatedData,
+                userId: req.user.id,
+            },
+        });
+        res.send(cart);
+    } else {
+        const cart = await prismaClient.cartItem.update({
+            where: {
+                id: oldCart.id,
+            },
+            data: {
+                quantity: oldCart.quantity + validatedData.quantity,
+            },
+        });
+        res.send(cart);
+    }
 };
 
 export const removeFromCart = async (req: Request, res: Response) => {
