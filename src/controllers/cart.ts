@@ -115,6 +115,9 @@ export const getCart = async (req: Request, res: Response) => {
         where: {
             userId: req.user.id,
         },
+        include: {
+            product: true,
+        },
     });
     res.json(cart);
 };
