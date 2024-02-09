@@ -135,3 +135,73 @@ export const getOrderById = async (req: Request, res: Response) => {
     }
     res.json(order);
 };
+
+export const listAllOrder = async (req: Request, res: Response) => {
+    let whereClause = {};
+    const status = req.query.status;
+    if (status) {
+        whereClause = {
+            status,
+        };
+    }
+    const orders = await prismaClient.order.findMany({
+        skip: +req.params.skip || 0,
+        take: 5,
+        where: whereClause,
+    });
+    res.json(orders);
+};
+
+export const listUserOrders = async (req: Request, res: Response) => {
+    let whereClause: any = {
+        userId: +req.params.id,
+    };
+    if (req.query.status) {
+        whereClause = {
+            ...whereClause,
+            status: req.query.status,
+        };
+    }
+    try {
+        const orders = await prismaClient.order.findMany({
+            skip: +req.params.skip || 0,
+            take: 5,
+            where: whereClause,
+        });
+        res.json(orders);
+    } catch (err: any) {
+        throw new NotFoundException(
+            "User not found!",
+            ErrorCodes.USER_NOT_FOUND,
+            err
+        );
+    }
+};
+
+export const changeStatus = async (req: Request, res: Response) => {
+    return await prismaClient.$transaction(async (tx) => {
+        try {
+            const updatedOrder = await prismaClient.order.update({
+                where: {
+                    id: +req.params.id,
+                },
+                data: {
+                    status: req.body.status,
+                },
+            });
+            await prismaClient.orderEvent.create({
+                data: {
+                    orderId: updatedOrder.id,
+                    status: req.body.status,
+                },
+            });
+            res.json(updatedOrder);
+        } catch (err: any) {
+            throw new NotFoundException(
+                "Order not found!",
+                ErrorCodes.ORDER_NOT_FOUND,
+                err
+            );
+        }
+    });
+};
