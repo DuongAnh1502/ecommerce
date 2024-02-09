@@ -1,3 +1,4 @@
+import { Role } from "@prisma/client";
 import { z } from "zod";
 
 export const SignUpSchema = z.object({
@@ -28,4 +29,9 @@ export const UpdateUserSchema = z.object({
     name: z.string().optional(),
     defaultShippingAddress: z.number().optional(),
     defaultBillingAddress: z.number().optional(),
+});
+
+export const ChangeUserRoleSchema = z.object({
+    id: z.number(),
+    role: z.enum(["USER", "ADMIN"]),
 });

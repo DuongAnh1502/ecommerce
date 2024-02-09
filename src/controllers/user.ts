@@ -1,6 +1,7 @@
 import { Response, Request } from "express";
 import {
     AddressSchema,
+    ChangeUserRoleSchema,
     UpdateAddressSchema,
     UpdateUserSchema,
 } from "../schema/users";
@@ -8,7 +9,7 @@ import { prismaClient } from "..";
 import { NotFoundException } from "../exceptions/not-found";
 import { ErrorCodes } from "../exceptions/root";
 import { UnauthorizedException } from "../exceptions/unauthorized";
-import { Address } from "@prisma/client";
+import { Address, User } from "@prisma/client";
 
 export const addAddress = async (req: Request, res: Response) => {
     AddressSchema.parse(req.body);
@@ -123,4 +124,57 @@ export const updateUser = async (req: Request, res: Response) => {
         data: req.body,
     });
     res.json(updatedUser);
+};
+
+export const listUsers = async (req: Request, res: Response) => {
+    const users = await prismaClient.user.findMany({
+        skip: +req.params.skip || 0,
+        take: 5,
+    });
+    if (users) {
+        res.json(users);
+    } else {
+        res.json({ message: "Empty!" });
+    }
+};
+
+export const getUserById = async (req: Request, res: Response) => {
+    try {
+        const user = await prismaClient.user.findFirstOrThrow({
+            where: {
+                id: +req.params.id,
+            },
+        });
+        res.json(user);
+    } catch (err: any) {
+        throw new NotFoundException(
+            "User not found!!",
+            ErrorCodes.USER_NOT_FOUND,
+            err
+        );
+    }
+};
+
+export const changeUserRole = async (req: Request, res: Response) => {
+    const validatedData = ChangeUserRoleSchema.parse(req.body);
+    try {
+        const user = await prismaClient.user.update({
+            where: {
+                id: +validatedData.id,
+            },
+            data: {
+                roleName: validatedData.role,
+            },
+            include: {
+                addresses: true,
+            },
+        });
+        res.json(user);
+    } catch (err: any) {
+        throw new NotFoundException(
+            "User not found!",
+            ErrorCodes.USER_NOT_FOUND,
+            err
+        );
+    }
 };
