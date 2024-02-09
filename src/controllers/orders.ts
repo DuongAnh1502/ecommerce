@@ -145,7 +145,7 @@ export const listAllOrder = async (req: Request, res: Response) => {
         };
     }
     const orders = await prismaClient.order.findMany({
-        skip: +req.params.skip || 0,
+        skip: +req.query.skip! || 0,
         take: 5,
         where: whereClause,
     });
@@ -164,7 +164,7 @@ export const listUserOrders = async (req: Request, res: Response) => {
     }
     try {
         const orders = await prismaClient.order.findMany({
-            skip: +req.params.skip || 0,
+            skip: +req.query.skip! || 0,
             take: 5,
             where: whereClause,
         });
